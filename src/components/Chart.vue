@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import {
   Chart as ChartJS,
+  type Chart, // 👈 สำหรับ type chart instance
   LineElement,
   PointElement,
   LinearScale,
@@ -15,9 +16,14 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+
 import { Line } from "vue-chartjs";
 import { computed, ref, watch } from "vue";
 import crosshairPlugin from "chartjs-plugin-crosshair";
+
+import type { ChartOptions } from "chart.js";
+
+import type { ComponentPublicInstance } from "vue";
 
 import zoomPlugin from "chartjs-plugin-zoom";
 
@@ -28,7 +34,9 @@ const props = defineProps<{
   labels: string[];
 }>();
 
-const chartRef = ref(null); // เพิ่ม ref เพื่อเก็บอ้างอิงถึง chart instance
+const chartRef = ref<ComponentPublicInstance<{ chart: Chart<"line"> }> | null>(
+  null
+);
 
 const y2BackgroundPlugin = {
   id: "y2BackgroundPlugin",
@@ -163,21 +171,24 @@ const chartData = computed(() => ({
   ],
 }));
 
-const chartOptions = ref({
+const chartOptions = ref<ChartOptions<"line">>({
   responsive: true,
-  y2BackgroundPlugin: true,
 
   maintainAspectRatio: false,
   plugins: {
-    crosshair: {
-      line: {
-        color: "#333",
-        width: 1,
+    ...({
+      crosshair: {
+        line: {
+          color: "#333",
+          width: 1,
+        },
+        sync: { enabled: false },
+        zoom: { enabled: false },
+        snap: { enabled: false },
       },
-      sync: { enabled: false }, // ถ้ามีหลาย chart แล้วอยาก sync กัน
-      zoom: { enabled: false }, // ไม่ซ้ำซ้อนกับ zoom plugin
-      snap: { enabled: false }, // ถ้าจะ snap กับจุดข้อมูล
-    },
+
+      y2BackgroundPlugin: true,
+    } as any), // 👈 TypeScript จะหยุดเช็ค plugin ตรงนี้
     backgroundZonePlugin: true,
 
     legend: { position: "top" },
@@ -228,8 +239,7 @@ const chartOptions = ref({
       pan: {
         enabled: true, // ✅ เปิดการเลื่อน (pan) ด้วย mouse drag
         mode: "x", // ✅ เลื่อนเฉพาะแนวแกน X
-        modifierKey: null, // ✅ ไม่ต้องกด Ctrl/Alt
-        speed: 20,
+        modifierKey: undefined, // ✅ แทน null
         threshold: 5,
       },
       limits: {
