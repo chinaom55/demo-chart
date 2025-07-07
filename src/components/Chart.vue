@@ -233,7 +233,9 @@ const chartOptions = ref<ChartOptions<"line">>({
           enabled: true,
           speed: 0.05,
         },
-
+        pinch: {
+          enabled: true, // ✅ เพิ่มบรรทัดนี้
+        },
         mode: "x",
       },
       pan: {

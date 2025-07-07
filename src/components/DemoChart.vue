@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, onUnmounted, ref } from "vue";
 import Chart from "./Chart.vue";
 import { getHour, getMinute } from "../services/sensor.service";
 import { formatDateTime } from "../utils/sensorUtil";
@@ -26,12 +26,12 @@ const getSensorMinute = async () => {
   try {
     const result = await getMinute();
 
-    const key = Object.keys(result)[0];
-    const data = result[key as keyof typeof result];
+    // const key = Object.keys(result)[0];
+    // const data = result[key as keyof typeof result];
 
-    datas.value = data.map((data: any) => data.sensorVal);
+    datas.value = result.datas;
 
-    labels.value = data.map((data: any) => formatDateTime(data.createdAt));
+    labels.value = result.labels;
   } catch (error) {
     console.error("❌ Error in getSensorMinute:", error);
   }
@@ -41,14 +41,30 @@ const getSensorHour = async () => {
   labels.value = [];
   datas.value = [];
   try {
-    const result = await getHour();
+    // const result = await getHour();
 
-    const key = Object.keys(result)[0];
-    const data = result[key as keyof typeof result];
+    // const key = Object.keys(result)[0];
+    // const data = result[key as keyof typeof result];
 
-    datas.value = data.map((data: any) => data.avg);
+    // datas.value = data.map((data: any) => data.avg);
 
-    labels.value = data.map((data: any) => formatDateTime(data.createdAt));
+    // labels.value = data.map((data: any) => formatDateTime(data.createdAt));
+
+    for (let i = 4319; i >= 0; i--) {
+      const d = new Date(today);
+      d.setHours(today.getHours() - i); // เปลี่ยนจาก setDate → setMinutes
+
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = String(d.getFullYear() + 543); // ปี พ.ศ.
+      const hh = String(d.getHours()).padStart(2, "0");
+
+      labels.value.push(`${dd}/${mm}/${yyyy}-${hh}:00`);
+    }
+
+    datas.value = labels.value.map(() =>
+      parseFloat((Math.random() * 9).toFixed(2))
+    );
   } catch (error) {
     console.error("❌ Error in getSensorMinute:", error);
   }
@@ -89,7 +105,8 @@ const selectedOption = (option: any) => {
 
     for (let i = 11; i >= 0; i--) {
       const d = new Date(today);
-      d.setDate(today.getDate() - i);
+      d.setMonth(today.getMonth() - i);
+
       const mm = String(d.getMonth() + 1).padStart(2, "0");
 
       const yyyy = String(d.getFullYear() + 543).padStart(2, "0");
@@ -105,7 +122,7 @@ const selectedOption = (option: any) => {
 
     for (let i = 4; i >= 0; i--) {
       const d = new Date(today);
-      d.setDate(today.getDate() - i);
+      d.setFullYear(today.getFullYear() - i);
 
       const yyyy = String(d.getFullYear() + 543).padStart(2, "0");
 
