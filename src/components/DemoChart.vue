@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, onUnmounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import Chart from "./Chart.vue";
-import { getHour, getMinute } from "../services/sensor.service";
-import { formatDateTime } from "../utils/sensorUtil";
+import { getMinute } from "../services/sensor.service";
 
 const options = ref(["นาที", "ชั่วโมง", "วัน", "เดือน", "ปี"]);
 
